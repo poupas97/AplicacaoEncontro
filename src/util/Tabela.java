@@ -1,11 +1,11 @@
 package util;
 
-import dtos.GrupoDTO;
 import gestores.GestaoGrupo;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Calendar;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -48,30 +48,50 @@ public class Tabela {
     
     private ArrayList<Object[]> getLinhasBarrenta(){
         ArrayList<Object[]> linhas = new ArrayList<>();
-        for (GrupoDTO grupoDTO : GESTAO_GRUPO.getGruposDTOs()){
+
+        for (Grupo grupo : GESTAO_GRUPO.getGrupos()){
+            String localizacao = grupo.getLocalizacao();
+            String concelho = grupo.getConcelho();
+            String distrito = grupo.getDistrito();
+
+            if (concelho != null)
+                localizacao = localizacao.concat(" (").concat(concelho).concat(", ").concat(distrito).concat(")");
+            else if (distrito != null)
+                localizacao = localizacao.concat(" (").concat(distrito).concat(")");
+
             linhas.add(new Object[]{
-                                grupoDTO.getPosicao(), 
-                                grupoDTO.getNome(), 
-                                grupoDTO.getLocalizacao().concat(" (").concat(grupoDTO.getConcelho().concat(", ").
-                                    concat(grupoDTO.getDistrito().concat(")"))), 
-                                grupoDTO.getnTocadores(), 
-                                grupoDTO.getnAcompanhantes(), 
-                                grupoDTO.getFullDataPrevista(), 
-                                grupoDTO.isTocarString()});
+                grupo.getPosicao(),
+                grupo.getNome(),
+                localizacao,
+                grupo.getnTocadores(),
+                grupo.getnAcompanhantes(),
+                grupo.getHoraPrevista(),
+                grupo.isTocarString()
+            });
         } 
         return linhas;
     } 
     
     private ArrayList<Object[]> getLinhasMostrarAtuacaoPalco(){
         ArrayList<Object[]> linhas = new ArrayList<>();
-        for (GrupoDTO grupoDTO : GESTAO_GRUPO.getGruposDTOs()){
+
+        for (Grupo grupo : GESTAO_GRUPO.getGrupos()){
+            String localizacao = grupo.getLocalizacao();
+            String concelho = grupo.getConcelho();
+            String distrito = grupo.getDistrito();
+
+            if (concelho != null)
+                localizacao = localizacao.concat(" (").concat(concelho).concat(", ").concat(distrito).concat(")");
+            else if (distrito != null)
+                localizacao = localizacao.concat(" (").concat(distrito).concat(")");
+
             linhas.add(new Object[]{
-                                grupoDTO.getPosicao(), 
-                                grupoDTO.getNome(), 
-                                grupoDTO.getLocalizacao().concat(" (").concat(grupoDTO.getConcelho().concat(", ").
-                                    concat(grupoDTO.getDistrito().concat(")"))), 
-                                grupoDTO.getnTocadores(), 
-                                grupoDTO.getFullDataPrevista()});
+                grupo.getPosicao(),
+                grupo.getNome(),
+                localizacao,
+                grupo.getnTocadores(),
+                grupo.getHoraPrevista()
+            });
         } 
         return linhas;
     } 
@@ -85,7 +105,8 @@ public class Tabela {
                 
                 Color c = Color.BLACK;
                 Grupo g = null;
-                switch(vista){
+
+                /*switch(vista){
                         case constantes.Constantes.VISTA_BARRENTA: 
                             g = GESTAO_GRUPO.getGrupoByHoraPrevista(table.getValueAt(row, 5).toString());
                             break;
@@ -94,6 +115,7 @@ public class Tabela {
                             g = GESTAO_GRUPO.getGrupoByHoraPrevista(table.getValueAt(row, 4).toString()); 
                             break;
                     }
+
                 if(g.isTocar()){
                     //c = Color.GREEN;
                     c = new Color(35, 142, 35);
@@ -106,7 +128,8 @@ public class Tabela {
                             label.setFont(new Font("Tahoma", Font.BOLD, 20)); 
                             break;
                     }
-                }
+                }*/
+
                 label.setForeground(c);
                 
                 return label;

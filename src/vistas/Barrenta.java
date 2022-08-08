@@ -1,14 +1,15 @@
 package vistas;
 
-import dialogos.DialogoEvento;
-import dtos.EventoDTO;
 import dialogos.DialogoGrupo;
 import gestores.GestaoEvento;
 import javax.swing.JOptionPane;
 import gestores.GestaoGrupo;
-import java.util.Date;
+
+import java.awt.*;
+import java.text.ParseException;
+import java.util.Calendar;
 import javax.swing.table.DefaultTableModel;
-import util.Data;
+import modelos.Evento;
 import util.Tabela;
 
 
@@ -18,34 +19,34 @@ public class Barrenta extends javax.swing.JFrame {
     private final GestaoEvento GESTAO_EVENTO = GestaoEvento.getINSTACIA();
     private final Tabela GESTAO_TABELA = Tabela.getINSTACIA();
     private final DialogoGrupo DIALOGO_GRUPO = DialogoGrupo.getINSTACIA();
-    private final DialogoEvento DIALOGO_EVENTO = DialogoEvento.getINSTACIA();
-    
+
     private MostrarAtuacaoPalco mostrarAtuacao;
     private LancarNotas lancarNotas;
     
     private DefaultTableModel tableModel;
     
-    public Barrenta() {
+    public Barrenta() throws ParseException {
         initComponents();
         setExtendedState(MAXIMIZED_BOTH);
         setTitle("Barrenta");
-        
-        GESTAO_EVENTO.setEvento(new EventoDTO("21 Encontro de Concertinas da Barrenta", "Barrenta", "24-09-2022 14:00", 8+""), "password");
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, 9, 24, 14, 0, 0);
+
+        GESTAO_EVENTO.setEvento(new Evento("21 Encontro de Concertinas da Barrenta",  calendar, 8));
         
         atualizarVista();
     }
     
     public void atualizarVista() {
-        if(!atualizarEvento()){
-            return;
-        }
+        if(!atualizarEvento()) return;
 
         atualizarTabelaGrupos();
         atualizarContagemGrupos();
         
-        if(mostrarAtuacao != null){
-            mostrarAtuacao.atulizarTabelaGrupos();
-        }
+        if(mostrarAtuacao == null) return;
+
+        mostrarAtuacao.atulizarTabelaGrupos();
     }
     
     private void atualizarTabelaGrupos() {
@@ -54,19 +55,14 @@ public class Barrenta extends javax.swing.JFrame {
     }
     
     private void atualizarContagemGrupos() {
-        jLabelQtdGrupos.setText(String.valueOf(GESTAO_GRUPO.getQtdGruposNaoEspecial()));
+        jLabelQtdGrupos.setText(String.valueOf(GESTAO_GRUPO.getQtdGrupos()));
         jLabelQtdTocadores.setText(String.valueOf(GESTAO_GRUPO.getQtdTocadores()));
         jLabelQtdAcompanhantes.setText(String.valueOf(GESTAO_GRUPO.getQtdAcompanhantes()));
-        //jLabelQtdTocadoresReal.setText(String.valueOf(GESTAO_GRUPO.getQtdTocadoresReal()));
     }
-
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
 
-        btnAlterarEvento = new javax.swing.JButton();
+    private void initComponents() {
         lblNome = new javax.swing.JLabel();
-        lblMorada = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         btnSair = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
@@ -74,7 +70,6 @@ public class Barrenta extends javax.swing.JFrame {
         lblData = new javax.swing.JLabel();
         lblMinutos = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
@@ -87,193 +82,120 @@ public class Barrenta extends javax.swing.JFrame {
         btnEditarGrupo = new javax.swing.JButton();
         btnEliminarGrupo = new javax.swing.JButton();
         btnDetalharGrupo = new javax.swing.JButton();
-        btnTrocar = new javax.swing.JButton();
         btnIniciarAtuacao = new javax.swing.JButton();
         btnImportar = new javax.swing.JButton();
         btnExportar = new javax.swing.JButton();
         btnConfirmarAtucao = new javax.swing.JButton();
-        btnAvancar = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        btnAcertarHora = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Barrenta");
+        setTitle("Aplicacao Encontro");
 
-        btnAlterarEvento.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        btnAlterarEvento.setText("Alterar Evento");
-        btnAlterarEvento.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAlterarEventoActionPerformed(evt);
-            }
-        });
-
-        lblNome.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblNome.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         lblNome.setText("[Nome]");
 
-        lblMorada.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        lblMorada.setText("[Morada]");
-
-        jLabel4.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel4.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabel4.setText("Grupos:");
 
-        btnSair.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnSair.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnSair.setText("Sair");
-        btnSair.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSairActionPerformed(evt);
-            }
-        });
+        btnSair.addActionListener(this::btnSairActionPerformed);
 
-        jLabel1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabel1.setText("Tocadores:");
 
-        jLabel3.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabel3.setText("Acompanhantes:");
 
-        lblData.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblData.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         lblData.setText("[Data de Inicio]");
 
-        lblMinutos.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        lblMinutos.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         lblMinutos.setText("[Minutos por Grupo]");
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Tahoma", Font.BOLD, 14)); // NOI18N
         jLabel2.setText("Nome");
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel5.setText("Morada");
 
-        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel7.setText("Data e Hora de inicio");
+        jLabel7.setFont(new java.awt.Font("Tahoma", Font.BOLD, 14)); // NOI18N
+        jLabel7.setText("Data/Hora inicio");
 
-        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel8.setFont(new java.awt.Font("Tahoma", Font.BOLD, 14)); // NOI18N
         jLabel8.setText("Minutos por Grupo");
 
-        jLabel6.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Tahoma", Font.BOLD, 14)); // NOI18N
         jLabel6.setText("Inscritos");
 
-        jLabelQtdGrupos.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelQtdGrupos.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelQtdGrupos.setText("[Qtd Grupos]");
 
-        jLabelQtdTocadores.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelQtdTocadores.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelQtdTocadores.setText("[Qtd Tocadores]");
 
-        jLabelQtdAcompanhantes.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelQtdAcompanhantes.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelQtdAcompanhantes.setText("[Qtd Acompanhantes]");
 
-        btnEstatisticas.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnEstatisticas.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnEstatisticas.setText("Estatisticas");
-        btnEstatisticas.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEstatisticasActionPerformed(evt);
-            }
-        });
+        btnEstatisticas.addActionListener(this::btnEstatisticasActionPerformed);
 
-        btnAdicionarGrupo.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnAdicionarGrupo.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnAdicionarGrupo.setText("Adicionar Grupo");
         btnAdicionarGrupo.setMaximumSize(null);
         btnAdicionarGrupo.setMinimumSize(null);
         btnAdicionarGrupo.setPreferredSize(null);
-        btnAdicionarGrupo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAdicionarGrupoActionPerformed(evt);
-            }
-        });
+        btnAdicionarGrupo.addActionListener(this::btnAdicionarGrupoActionPerformed);
 
-        btnEditarGrupo.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnEditarGrupo.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnEditarGrupo.setText("Editar Grupo");
         btnEditarGrupo.setMaximumSize(null);
         btnEditarGrupo.setMinimumSize(null);
         btnEditarGrupo.setPreferredSize(null);
-        btnEditarGrupo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEditarGrupoActionPerformed(evt);
-            }
-        });
+        btnEditarGrupo.addActionListener(this::btnEditarGrupoActionPerformed);
 
-        btnEliminarGrupo.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnEliminarGrupo.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnEliminarGrupo.setText("Eliminar Grupo");
         btnEliminarGrupo.setMaximumSize(null);
         btnEliminarGrupo.setMinimumSize(null);
         btnEliminarGrupo.setPreferredSize(null);
-        btnEliminarGrupo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnEliminarGrupoActionPerformed(evt);
-            }
-        });
+        btnEliminarGrupo.addActionListener(this::btnEliminarGrupoActionPerformed);
 
-        btnDetalharGrupo.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnDetalharGrupo.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnDetalharGrupo.setText("Detalhar Grupo");
         btnDetalharGrupo.setMaximumSize(null);
         btnDetalharGrupo.setMinimumSize(null);
         btnDetalharGrupo.setPreferredSize(null);
-        btnDetalharGrupo.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnDetalharGrupoActionPerformed(evt);
-            }
-        });
+        btnDetalharGrupo.addActionListener(this::btnDetalharGrupoActionPerformed);
 
-        btnTrocar.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        btnTrocar.setText("Trocar Grupos");
-        btnTrocar.setMaximumSize(null);
-        btnTrocar.setMinimumSize(null);
-        btnTrocar.setPreferredSize(null);
-        btnTrocar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnTrocarActionPerformed(evt);
-            }
-        });
 
-        btnIniciarAtuacao.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnIniciarAtuacao.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnIniciarAtuacao.setText("Abrir Atuacoes");
         btnIniciarAtuacao.setMaximumSize(null);
         btnIniciarAtuacao.setMinimumSize(null);
         btnIniciarAtuacao.setOpaque(false);
         btnIniciarAtuacao.setPreferredSize(null);
-        btnIniciarAtuacao.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnIniciarAtuacaoActionPerformed(evt);
-            }
-        });
+        btnIniciarAtuacao.addActionListener(this::btnIniciarAtuacaoActionPerformed);
 
-        btnImportar.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnImportar.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnImportar.setText("Importar Grupos");
         btnImportar.setMaximumSize(null);
         btnImportar.setMinimumSize(null);
         btnImportar.setPreferredSize(null);
-        btnImportar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnImportarActionPerformed(evt);
-            }
-        });
+        btnImportar.addActionListener(this::btnImportarActionPerformed);
 
-        btnExportar.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnExportar.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnExportar.setText("Exportar Grupos");
         btnExportar.setMaximumSize(null);
         btnExportar.setMinimumSize(null);
         btnExportar.setPreferredSize(null);
-        btnExportar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnExportarActionPerformed(evt);
-            }
-        });
+        btnExportar.addActionListener(this::btnExportarActionPerformed);
 
-        btnConfirmarAtucao.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnConfirmarAtucao.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnConfirmarAtucao.setText("Confirmar Atuacao");
-        btnConfirmarAtucao.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnConfirmarAtucaoActionPerformed(evt);
-            }
-        });
+        btnConfirmarAtucao.addActionListener(this::btnConfirmarAtucaoActionPerformed);
 
-        btnAvancar.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        btnAvancar.setText("Avancar Grupo");
-        btnAvancar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAvancarActionPerformed(evt);
-            }
-        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -292,45 +214,42 @@ public class Barrenta extends javax.swing.JFrame {
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                     .addComponent(btnEditarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(btnAdicionarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)))
-                            .addComponent(btnConfirmarAtucao, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnAvancar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(btnConfirmarAtucao, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnEliminarGrupo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnDetalharGrupo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnTrocar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnIniciarAtuacao, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(btnEstatisticas)
-                .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnAdicionarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                    .addComponent(btnDetalharGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnEditarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                    .addComponent(btnEliminarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnTrocar, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
-                    .addComponent(btnAvancar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(51, 51, 51)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnConfirmarAtucao, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnIniciarAtuacao, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(btnImportar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnExportar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(btnAdicionarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                        .addComponent(btnDetalharGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnEditarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, 70, Short.MAX_VALUE)
+                            .addComponent(btnEliminarGrupo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false))
+                    .addGap(51, 51, 51)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnConfirmarAtucao, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnIniciarAtuacao, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGap(51, 51, 51)
+                    .addComponent(btnEstatisticas)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnImportar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(btnExportar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            )
         );
 
         jPanel2.setForeground(new java.awt.Color(0, 100, 0));
 
-        jTable1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jTable1.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -369,14 +288,6 @@ public class Barrenta extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        btnAcertarHora.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        btnAcertarHora.setText("Acertar Hora");
-        btnAcertarHora.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAcertarHoraActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -409,11 +320,10 @@ public class Barrenta extends javax.swing.JFrame {
                                         .addGap(0, 0, Short.MAX_VALUE))
                                     .addComponent(lblData, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(lblMinutos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(lblMorada, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
+                                    ))))
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabel8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(319, 319, 319))
@@ -425,9 +335,8 @@ public class Barrenta extends javax.swing.JFrame {
                     .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 284, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSair, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 65, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnAlterarEvento, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnAcertarHora, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                ))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -441,8 +350,7 @@ public class Barrenta extends javax.swing.JFrame {
                             .addComponent(lblNome))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(lblMorada))
+                           )
                         .addGap(9, 9, 9)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
@@ -452,8 +360,7 @@ public class Barrenta extends javax.swing.JFrame {
                             .addComponent(jLabel8)
                             .addComponent(lblMinutos)))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(btnAlterarEvento, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnAcertarHora, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        ))
                 .addGap(24, 24, 24)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -476,17 +383,7 @@ public class Barrenta extends javax.swing.JFrame {
         );
 
         pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void btnAlterarEventoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAlterarEventoActionPerformed
-        String acesso = DIALOGO_EVENTO.introduzirAcesso();
-        if(acesso != null){
-            new ConfigurarEvento(this, acesso).setVisible(true);
-            atualizarVista();
-        }else{
-            DIALOGO_EVENTO.acessoErrado();
-        }
-    }//GEN-LAST:event_btnAlterarEventoActionPerformed
+    }
 
     private void btnAdicionarGrupoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAdicionarGrupoActionPerformed
         ConfigurarGrupo dadosConta =  new ConfigurarGrupo(this);
@@ -503,10 +400,12 @@ public class Barrenta extends javax.swing.JFrame {
 
     private void btnEditarGrupoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEditarGrupoActionPerformed
         int row = jTable1.getSelectedRow();
+
         if(row < 0){
             DIALOGO_GRUPO.selecionarGrupo();
             return;
         }
+
         ConfigurarGrupo dadosGrupo =  new ConfigurarGrupo(this, (String) tableModel.getValueAt(row, 1));
         dadosGrupo.setVisible(true);
         atualizarVista();
@@ -525,16 +424,6 @@ public class Barrenta extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnEliminarGrupoActionPerformed
 
-    private void btnTrocarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTrocarActionPerformed
-        if(GESTAO_GRUPO.getQtdGrupos() == 0){
-            DIALOGO_GRUPO.naoExistemGrupos();
-            return;
-        }
-        
-        TrocarGrupo trocarGrupo = new TrocarGrupo(this);
-        trocarGrupo.setVisible(true);
-        atualizarVista();
-    }//GEN-LAST:event_btnTrocarActionPerformed
 
     private void btnExportarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportarActionPerformed
         if(!GESTAO_GRUPO.exportarGrupos()){
@@ -582,33 +471,16 @@ public class Barrenta extends javax.swing.JFrame {
 
     private void btnConfirmarAtucaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnConfirmarAtucaoActionPerformed
         int row = jTable1.getSelectedRow();
+
         if(row < 0){
             DIALOGO_GRUPO.selecionarGrupo();
             return;
         }
         
-        GESTAO_GRUPO.setEstadoAtucao((String) tableModel.getValueAt(row, 5));
+        GESTAO_GRUPO.setEstadoAtucao((String) tableModel.getValueAt(row, 1));
         atualizarVista();
     }//GEN-LAST:event_btnConfirmarAtucaoActionPerformed
-    
-    private void btnAcertarHoraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAcertarHoraActionPerformed
-        /*AcertarHora acertarHora = new AcertarHora(this);
-        acertarHora.setVisible(true);*/
-        
-        if(GESTAO_GRUPO.getQtdGrupos() == 0){
-            DIALOGO_GRUPO.naoExistemGrupos();
-            return;
-        }
-        
-        String acesso = DIALOGO_EVENTO.introduzirAcesso();
-        if(acesso == null){
-            DIALOGO_EVENTO.acessoErrado();
-            return;
-        }
-        
-        GESTAO_GRUPO.alterarHoraPrevista((new Data(new Date())).dataToString(), true);
-        atualizarVista();
-    }//GEN-LAST:event_btnAcertarHoraActionPerformed
+
 
     private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
         if(jTable1.isEditing()){
@@ -616,39 +488,14 @@ public class Barrenta extends javax.swing.JFrame {
         }
         
         int index = jTable1.getSelectedRow();
-        if(GESTAO_GRUPO.getGrupoDTO(index).isTocar()){
+        if(GESTAO_GRUPO.getGrupo(index).isTocar()){
             btnConfirmarAtucao.setText("Desmarcar Atuacao");
         }else{
             btnConfirmarAtucao.setText("Confirmar Atuacao");
         }
     }//GEN-LAST:event_jTable1MouseClicked
 
-    private void btnAvancarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAvancarActionPerformed
-        int row = jTable1.getSelectedRow();
-        
-        if(row < 0){
-            DIALOGO_GRUPO.selecionarGrupo();
-            return;
-        }
-        
-        if(GESTAO_GRUPO.getGrupo(row).isTocar()){
-            DIALOGO_GRUPO.acaoNaoAplicavel();
-                return;
-        }
-        
-        switch(DIALOGO_GRUPO.avancarRecuarGrupo()){
-            case 0:
-                GESTAO_GRUPO.avancarGrupo(row);
-                break;
-            case 1:
-                GESTAO_GRUPO.recuarGrupo(row);
-                break;
-            default: return;
-        }
-        
-        atualizarTabelaGrupos();
-    }//GEN-LAST:event_btnAvancarActionPerformed
-    
+
     public void setMostrarAtuacao(MostrarAtuacaoPalco mostrarAtuacao) {
         this.mostrarAtuacao = mostrarAtuacao;
     }
@@ -658,19 +505,19 @@ public class Barrenta extends javax.swing.JFrame {
     }
     
     private boolean atualizarEvento(){
-        EventoDTO eventoDTO = GESTAO_EVENTO.getEvento();
-        
-        if(eventoDTO.getNome() == null || eventoDTO.getMorada() == null || 
-                eventoDTO.getFullData().compareTo("dd-mm-aaaa hh:mm") == 0 ||
-                eventoDTO.getMinutosGrupo().compareTo("0") == 0){
+        Evento evento = GESTAO_EVENTO.getEvento();
+
+        if(evento.getNome() == null || evento.getData() == null || evento.getMinutosGrupo() == 0){
             ativarLayout(false);
+
+            System.out.println("error");
+
             return false;
         }
-        
-        lblMorada.setText(eventoDTO.getMorada());
-        lblNome.setText(eventoDTO.getNome());
-        lblData.setText(eventoDTO.getFullData());
-        lblMinutos.setText(eventoDTO.getMinutosGrupo());
+
+        lblNome.setText(evento.getNome());
+        lblData.setText(evento.getData().get(Calendar.HOUR_OF_DAY) + ":" + evento.getData().get(Calendar.MINUTE));
+        lblMinutos.setText(evento.getMinutosGrupo() + "");
         
         ativarLayout(true);
         
@@ -683,7 +530,6 @@ public class Barrenta extends javax.swing.JFrame {
         btnEditarGrupo.setEnabled(estado);
         btnEliminarGrupo.setEnabled(estado);
         btnExportar.setEnabled(estado);
-        btnTrocar.setEnabled(estado);
         btnImportar.setEnabled(estado);
         btnConfirmarAtucao.setEnabled(estado);
         btnIniciarAtuacao.setEnabled(estado);
@@ -704,16 +550,17 @@ public class Barrenta extends javax.swing.JFrame {
         }
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Barrenta().setVisible(true);
-                
+                try {
+                    new Barrenta().setVisible(true);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+
             }
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnAcertarHora;
     private javax.swing.JButton btnAdicionarGrupo;
-    private javax.swing.JButton btnAlterarEvento;
-    private javax.swing.JButton btnAvancar;
     private javax.swing.JButton btnConfirmarAtucao;
     private javax.swing.JButton btnDetalharGrupo;
     private javax.swing.JButton btnEditarGrupo;
@@ -723,12 +570,10 @@ public class Barrenta extends javax.swing.JFrame {
     private javax.swing.JButton btnImportar;
     private javax.swing.JButton btnIniciarAtuacao;
     private javax.swing.JButton btnSair;
-    private javax.swing.JButton btnTrocar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -741,7 +586,6 @@ public class Barrenta extends javax.swing.JFrame {
     private javax.swing.JTable jTable1;
     private javax.swing.JLabel lblData;
     private javax.swing.JLabel lblMinutos;
-    private javax.swing.JLabel lblMorada;
     private javax.swing.JLabel lblNome;
     // End of variables declaration//GEN-END:variables
 

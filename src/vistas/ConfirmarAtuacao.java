@@ -2,8 +2,10 @@ package vistas;
 
 import dialogos.DialogoGrupo;
 import dialogos.DialogoParse;
-import dtos.GrupoDTO;
 import gestores.GestaoGrupo;
+import modelos.Grupo;
+
+import java.util.Calendar;
 
 
 public class ConfirmarAtuacao extends javax.swing.JDialog { 
@@ -12,24 +14,24 @@ public class ConfirmarAtuacao extends javax.swing.JDialog {
     private final DialogoParse DIALOGO_PARSE = DialogoParse.getINSTACIA();
     private final DialogoGrupo DIALOGO_GRUPO = DialogoGrupo.getINSTACIA();
     
-    private GrupoDTO grupoDTO;
+    private Grupo grupo;
     
-    public ConfirmarAtuacao(java.awt.Frame parent, GrupoDTO grupoDTO) {
+    public ConfirmarAtuacao(java.awt.Frame parent, Grupo grupo) {
         super(parent, true);
         initComponents();
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(jButtonConfirmar);
         setTitle("Confirmacao da Atuacao");
         
-        this.grupoDTO = grupoDTO;
+        this.grupo = grupo;
         
-        jLabelPosicao2.setText(String.valueOf(grupoDTO.getPosicao()));
-        jLabelNome2.setText(grupoDTO.getNome());
-        jLabelLocalizacao2.setText(grupoDTO.getLocalizacao());
-        jLabelNTocadores2.setText(String.valueOf(grupoDTO.getnTocadores()));
-        jLabelNAcompanhantes2.setText(String.valueOf(grupoDTO.getnAcompanhantes()));
-        jLabelHoraPrevista2.setText(grupoDTO.getHoraPrevista());
-        jFormattedTextFieldNTocadoresReal.setText(String.valueOf(grupoDTO.getnTocadores()));
+        jLabelPosicao2.setText(String.valueOf(grupo.getPosicao()));
+        jLabelNome2.setText(grupo.getNome());
+        jLabelLocalizacao2.setText(grupo.getLocalizacao());
+        jLabelNTocadores2.setText(String.valueOf(grupo.getnTocadores()));
+        jLabelNAcompanhantes2.setText(String.valueOf(grupo.getnAcompanhantes()));
+        jLabelHoraPrevista2.setText(grupo.getHoraPrevista());
+        jFormattedTextFieldNTocadoresReal.setText(String.valueOf(grupo.getnTocadores()));
     } 
     
     @SuppressWarnings("unchecked")

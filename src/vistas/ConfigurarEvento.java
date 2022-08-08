@@ -2,15 +2,13 @@ package vistas;
 
 import dialogos.DialogoEvento;
 import dialogos.DialogoParse;
-import dtos.EventoDTO;
 import gestores.GestaoEvento;
 import gestores.GestaoGrupo;
 import util.Ficheiro;
 
 
 public class ConfigurarEvento extends javax.swing.JDialog {
-    
-    private EventoDTO eventoDTO;
+
     private final DialogoEvento DIALOGO_EVENTO = DialogoEvento.getINSTACIA();
     private final DialogoParse DIALOGO_PARSE = DialogoParse.getINSTACIA();
     private final GestaoEvento GESTAO_EVENTO = GestaoEvento.getINSTACIA();
@@ -21,12 +19,12 @@ public class ConfigurarEvento extends javax.swing.JDialog {
     
     public ConfigurarEvento(java.awt.Frame parent, String acesso) {
         super(parent, true);
-        eventoDTO = GESTAO_EVENTO.getEvento();
+       /* eventoDTO = GESTAO_EVENTO.getEvento();
         initComponents();
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(btnGuardar);
         
-        jTextFieldData.setText(eventoDTO.getFullData());
+        jTextFieldData.setText(eventoDTO.getDate().getStringData());
         jFormattedTextFieldMinutos.setText(eventoDTO.getMinutosGrupo());
         jTextFieldMorada.setText(eventoDTO.getMorada());
         jTextFieldNome.setText(eventoDTO.getNome());
@@ -34,6 +32,7 @@ public class ConfigurarEvento extends javax.swing.JDialog {
         this.acesso = acesso;
         
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("CONFIGURACOES EVENTO");
+        */
     }
 
     @SuppressWarnings("unchecked")
@@ -156,7 +155,7 @@ public class ConfigurarEvento extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelarActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
-        String nome = jTextFieldNome.getText().trim();
+       /* String nome = jTextFieldNome.getText().trim();
         String morada = jTextFieldMorada.getText().trim();
         String minutos = jFormattedTextFieldMinutos.getText().trim();
         String dataString = jTextFieldData.getText();
@@ -164,21 +163,21 @@ public class ConfigurarEvento extends javax.swing.JDialog {
         if(!nome.isEmpty() && !morada.isEmpty() && !minutos.isEmpty() && Integer.parseInt(minutos) > 0 && 
                 !dataString.isEmpty()){
             try{
-                eventoDTO.setData(dataString);
+                eventoDTO.setData(new Data(dataString));
                 eventoDTO.setMinutosGrupo(minutos);
                 eventoDTO.setMorada(morada);
                 eventoDTO.setNome(nome);
                 
-                GESTAO_EVENTO.setEvento(eventoDTO, acesso);
+                GESTAO_EVENTO.setEvento(eventoDTO);
                 setVisible(false);
                 
-                GESTAO_GRUPO.alterarHoraPrevista(eventoDTO.getFullData(), false);
+                GESTAO_GRUPO.alterarHoraPrevista(eventoDTO.getDate().dataToString(), false);
             }catch(NumberFormatException exception){
                 DIALOGO_PARSE.erroParseNumero();
             }
         }else{
             DIALOGO_EVENTO.faltamParametros();
-        }
+        }*/
     }//GEN-LAST:event_btnGuardarActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

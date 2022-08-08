@@ -14,7 +14,7 @@ import java.util.Locale;
  * @author ruben
  */
 public class Constantes {
-    public static final DateFormat FORMATER = new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.ENGLISH);
+    public static final DateFormat FORMATER = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
     public static final int MINUTOS_DELAY_ENTRE_GRUPOS = 2;
     public static final int NUMERO_GRUPO_PARA_INSERIR_ESPECIAL = 6;
     public static final int NUMERO_GRUPO_PARA_AVANCAR = 5;

@@ -40,14 +40,17 @@ public class GestaoLocal {
     }
     
     public ArrayList<String> getConcelhos(String distrito){
+        if(distrito == null) return new ArrayList<>();
+
         if(locais == null){
             lerLocais();
         }
-        
-        ArrayList<String> array = new ArrayList<>(locaisLidos.get(distrito));
-        array.add(constantes.Constantes.SELECIONE_UM_CONCELHO);
-        array.sort(Comparator.naturalOrder());
-        return array;
+
+        ArrayList<String> concelhos = new ArrayList<>(locaisLidos.get(distrito));
+        concelhos.add(constantes.Constantes.SELECIONE_UM_CONCELHO);
+        concelhos.sort(Comparator.naturalOrder());
+
+        return concelhos;
     }
     
 }

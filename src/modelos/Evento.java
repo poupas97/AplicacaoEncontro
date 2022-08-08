@@ -1,23 +1,20 @@
 package modelos;
 
-import java.util.Date;
-import util.Data;
+import java.util.Calendar;
 
 public class Evento {
     private static final int minAdicionais = 2;
     
     private String nome;
-    private String morada;
-    private Data data;
+    private Calendar date;
     private int minutosGrupo;
 
     public Evento() {
     }
 
-    public Evento(String nome, String morada, Data data, int minutosGrupo) {
+    public Evento(String nome, Calendar data, int minutosGrupo) {
         this.nome = nome;
-        this.morada = morada;
-        this.data = data;
+        this.date = data;
         this.minutosGrupo = minutosGrupo + minAdicionais;
     }
 
@@ -25,25 +22,16 @@ public class Evento {
         return nome;
     }
 
-    public String getMorada() {
-        return morada;
-    }
+    public Calendar getData() { return (Calendar) date.clone(); }
 
-    public Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
+    public void setData(Calendar data) {
+        this.date = data;
     }
 
     public void setNome(String nome) {
         this.nome = nome;
     }
 
-    public void setMorada(String morada) {
-        this.morada = morada;
-    }
 
     public int getMinutosGrupo() {
         return minutosGrupo;
@@ -52,5 +40,9 @@ public class Evento {
     public void setMinutosGrupo(int minutosGrupo) {
         this.minutosGrupo = minutosGrupo;
     }
-    
+
+    @Override
+    public String toString() {
+        return "nome: " + nome + "     data: " + date;
+    }
 }

@@ -2,14 +2,14 @@ package vistas;
 
 import dialogos.DialogoEvento;
 import dialogos.DialogoParse;
-import dtos.EventoDTO;
 import gestores.GestaoEvento;
 import gestores.GestaoGrupo;
+import modelos.Evento;
 
 
 public class AcertarHora extends javax.swing.JDialog {
     
-    private EventoDTO eventoDTO;
+    private Evento eventoDTO;
     private final DialogoEvento DIALOGO_EVENTO = DialogoEvento.getINSTACIA();
     private final DialogoParse DIALOGO_PARSE = DialogoParse.getINSTACIA();
     private final GestaoGrupo GESTAO_GRUPO = GestaoGrupo.getINSTACIA();
@@ -106,7 +106,7 @@ public class AcertarHora extends javax.swing.JDialog {
 
         if(!dataString.isEmpty()){
             try{
-                eventoDTO.setData(dataString);
+                // eventoDTO.setData(new Data(dataString));
                 
                 GESTAO_GRUPO.alterarHoraPrevista(dataString, true);
                 setVisible(false);

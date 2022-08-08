@@ -1,8 +1,7 @@
 package modelos;
 
-import java.util.Date;
+import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
-import util.Data;
 
 public class Grupo {
     private static final AtomicInteger counter = new AtomicInteger(0);
@@ -14,18 +13,16 @@ public class Grupo {
     private String concelho;
     private String email;
     private String contacto;
-    private int nTocadoresIncricao;
-    private int nAcompanhantesInscricao;
-    private Data horaPrevista;
-    private boolean especial;
+    private int nTocadores;
+    private int nAcompanhantes;
+    private Calendar dataHoraPrevista;
     private boolean tocar;
-    private int nTocadoresReal;
 
     public Grupo() {
     }
 
     public Grupo(String nome, String localizacao, String distrito, String concelho, String email, String contacto, 
-            int nTocadores, int nAcompanhantes, Data horaPrevista) {
+            int nTocadores, int nAcompanhantes, Calendar dataHoraPrevista, boolean tocar) {
         posicao = counter.incrementAndGet();
         this.nome = nome;
         this.localizacao = localizacao;
@@ -33,24 +30,39 @@ public class Grupo {
         this.concelho = concelho;
         this.email = email;
         this.contacto = contacto;
-        this.nTocadoresIncricao = nTocadores;
-        this.nAcompanhantesInscricao = nAcompanhantes;
-        this.horaPrevista = horaPrevista;
-        this.especial = false;
-    }    
+        this.nTocadores = nTocadores;
+        this.nAcompanhantes = nAcompanhantes;
+        this.dataHoraPrevista = dataHoraPrevista;
+        this.tocar = tocar;
+    }
 
-    public Grupo(String nome, Data horaPrevista) {
+    public Grupo(String nome, Calendar dataHoraPrevista) {
         posicao = counter.incrementAndGet();
-        this.horaPrevista = horaPrevista;
-        this.especial = true;
+        this.dataHoraPrevista = dataHoraPrevista;
         this.nome = nome;
         
         this.localizacao = "";
         this.distrito = null;
         this.email = "";
         this.contacto = "";
-        this.nTocadoresIncricao = 0;
-        this.nAcompanhantesInscricao = 0;
+        this.nTocadores = 0;
+        this.nAcompanhantes = 0;
+    }
+
+    public Grupo(int posicao, String nome, String localizacao, String distrito, String concelho, String email, String contacto,
+                 int nTocadores, int nAcompanhantes, Calendar dataHoraPrevista, boolean tocar) {
+        this.posicao = posicao;
+        this.nome = nome;
+        this.localizacao = localizacao;
+        this.distrito = distrito;
+        this.concelho = concelho;
+        this.email = email;
+        this.contacto = contacto;
+        this.nTocadores = nTocadores;
+        this.nAcompanhantes = nAcompanhantes;
+        this.dataHoraPrevista = dataHoraPrevista;
+        this.tocar = tocar;
+
     }
 
     public int getPosicao() {
@@ -77,32 +89,32 @@ public class Grupo {
         this.localizacao = localizacao;
     }
 
-    public int getnTocadoresIncricao() {
-        return nTocadoresIncricao;
+    public int getnTocadores() {
+        return nTocadores;
     }
 
-    public void setnTocadoresIncricao(int nTocadoresIncricao) {
-        this.nTocadoresIncricao = nTocadoresIncricao;
+    public void setnTocadores(int nTocadores) {
+        this.nTocadores = nTocadores;
     }
 
-    public int getnAcompanhantesInscricao() {
-        return nAcompanhantesInscricao;
+    public int getnAcompanhantes() {
+        return nAcompanhantes;
     }
 
-    public void setnAcompanhantesInscricao(int nAcompanhantesInscricao) {
-        this.nAcompanhantesInscricao = nAcompanhantesInscricao;
+    public void setnAcompanhantes(int nAcompanhantes) {
+        this.nAcompanhantes = nAcompanhantes;
     }
 
-    public Data getHoraPrevista() {
-        return horaPrevista;
+    public Calendar getDataHoraPrevista() {
+        return dataHoraPrevista;
     }
 
-    public void setHoraPrevista(Date horaPrevista) {
-        this.horaPrevista = new Data(horaPrevista);
+    public void setDataHoraPrevista(Calendar dataHoraPrevista) {
+        this.dataHoraPrevista = dataHoraPrevista;
     }
     
-    public void setHoraPrevista(Data horaPrevista) {
-        this.horaPrevista = horaPrevista;
+    public void setHoraPrevista(Calendar dataHoraPrevista) {
+        this.dataHoraPrevista = dataHoraPrevista;
     }
 
     public boolean isTocar() {
@@ -113,13 +125,6 @@ public class Grupo {
         this.tocar = tocar;
     }
 
-    public int getnTocadoresReal() {
-        return nTocadoresReal;
-    }
-
-    public void setnTocadoresReal(int nTocadoresReal) {
-        this.nTocadoresReal = nTocadoresReal;
-    }
 
     public String getDistrito() {
         return distrito;
@@ -153,18 +158,23 @@ public class Grupo {
         this.contacto = contacto;
     }
 
-    public boolean isEspecial() {
-        return especial;
+    public String isTocarString() {
+        return tocar ? "sim" : "nao";
     }
 
-    public void setEspecial(boolean especial) {
-        this.especial = especial;
+    public String getHoraPrevista() {
+        return dataHoraPrevista.get(Calendar.HOUR_OF_DAY) + ":" + dataHoraPrevista.get(Calendar.MINUTE);
     }
-    
+
+    public String getDataHoraPrevistaString() {
+        return dataHoraPrevista.get(Calendar.YEAR) + "/" + dataHoraPrevista.get(Calendar.MONTH) + "/" + dataHoraPrevista.get(Calendar.DAY_OF_MONTH) + " " +
+        dataHoraPrevista.get(Calendar.HOUR_OF_DAY) + ":" + dataHoraPrevista.get(Calendar.MINUTE);
+    }
+
     @Override
     public String toString() {
-        return "#" + posicao + "     " + nome + "     " + localizacao + " (" + distrito + ")     Tocadores: " + 
-                nTocadoresIncricao + "     Acompanhates: " + nAcompanhantesInscricao + "     Hora prevista: " + horaPrevista + 
-                "     Atuacao: " + (tocar ? "sim" : "nao");
+        return "#" + posicao + "     " + nome + "     " + localizacao + " (" + distrito + ")     Tocadores: " +
+                nTocadores + "     Acompanhates: " + nAcompanhantes + "     Data Hora prevista: " + dataHoraPrevista +
+                "     Atuacao: " + isTocarString();
     }
 }

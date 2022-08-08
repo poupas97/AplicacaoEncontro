@@ -14,8 +14,7 @@ public class Estatisticas extends javax.swing.JDialog {
         setTitle("Estatisticas");
         getRootPane().setDefaultButton(jButtonVoltar);
         
-        jLabelQtdGrupos.setText(GESTAO_GRUPO.getQtdGruposNaoEspecial() + "");
-        jLabelQtdGruposEspeciais.setText(GESTAO_GRUPO.getQtdGruposEspecial() + "");
+        jLabelQtdGrupos.setText(GESTAO_GRUPO.getQtdGrupos() + "");
         jLabelQtdTocadoresIns.setText(GESTAO_GRUPO.getQtdTocadores()+ "");
         jLabelAcompanhantes.setText(GESTAO_GRUPO.getQtdAcompanhantes()+ "");
         //jLabelQtdTocadoresReais.setText(GESTAO_GRUPO.getQtdTocadoresReal()+ "");
@@ -41,7 +40,6 @@ public class Estatisticas extends javax.swing.JDialog {
         jScrollPane2 = new javax.swing.JScrollPane();
         jListGruposConcelho = new javax.swing.JList<String>();
         jLabelPosicao1 = new javax.swing.JLabel();
-        jLabelQtdGruposEspeciais = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Conta");
@@ -92,8 +90,6 @@ public class Estatisticas extends javax.swing.JDialog {
         jLabelPosicao1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabelPosicao1.setText("Grupos Especiais");
 
-        jLabelQtdGruposEspeciais.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabelQtdGruposEspeciais.setText("Nome");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -124,7 +120,6 @@ public class Estatisticas extends javax.swing.JDialog {
                             .addComponent(jLabelLocalizacao, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabelQtdGruposEspeciais, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabelQtdGrupos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabelAcompanhantes, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jLabelQtdTocadoresIns, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -139,8 +134,7 @@ public class Estatisticas extends javax.swing.JDialog {
                     .addComponent(jLabelQtdGrupos))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelPosicao1)
-                    .addComponent(jLabelQtdGruposEspeciais))
+                    .addComponent(jLabelPosicao1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabelQtdTocadoresIns)
@@ -193,7 +187,6 @@ public class Estatisticas extends javax.swing.JDialog {
     private javax.swing.JLabel jLabelPosicao;
     private javax.swing.JLabel jLabelPosicao1;
     private javax.swing.JLabel jLabelQtdGrupos;
-    private javax.swing.JLabel jLabelQtdGruposEspeciais;
     private javax.swing.JLabel jLabelQtdTocadoresIns;
     private javax.swing.JList<String> jListGruposConcelho;
     private javax.swing.JList<String> jListGruposDistrito;

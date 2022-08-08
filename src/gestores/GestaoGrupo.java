@@ -1,11 +1,7 @@
 package gestores;
 
-import util.Data;
-import dtos.GrupoDTO;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;
 import modelos.Grupo;
@@ -13,15 +9,13 @@ import util.Ficheiro;
 
 
 public class GestaoGrupo {
-    private ArrayList<Grupo> grupos;
+    private final ArrayList<Grupo> grupos;
     private HashMap<String, Integer> hashMap;
     private DefaultListModel listagem;
     
     private static final GestaoGrupo INSTACIA = new GestaoGrupo();
     private final GestaoEvento GESTAO_EVENTO = GestaoEvento.getINSTACIA();
     private final Ficheiro FICHEIRO_INS = Ficheiro.getINSTACIA();
-    
-    private int gruposNaoEspecial = 0, gruposEspecial = 0;
     
     public static GestaoGrupo getINSTACIA() {
         return INSTACIA;
@@ -34,115 +28,143 @@ public class GestaoGrupo {
     public Grupo getGrupo(int index){
         return getGrupos().get(index);
     }
-    
-    public GrupoDTO getGrupoDTO(int index){
-        return grupoToDTO(getGrupo(index));
-    }
-    
-    public GrupoDTO adicionarGrupoEspecial(String nome, Data data){
-        Grupo grupo = new Grupo((nome.trim().isEmpty() ? "ESPECIAL" : nome), data);
+
+    public void adicionarLinhaBranca(String nome, Calendar data){
+        Grupo grupo = new Grupo((nome.trim().isEmpty() ? "ESPECIAL" : nome), (Calendar) data.clone());
         grupos.add(grupo);
-        addGrupoEspecial();
-        
-        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("ADICIONAR GRUPO ESPECIAL" + grupo.getHoraPrevista());
+
+        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("ADICIONAR GRUPO ESPECIAL" + grupo.getDataHoraPrevista());
         exportarGrupos();
-        
-        //checkAdicionarEspecial();
-        return grupoToDTO(grupo);
     }
     
-    public GrupoDTO adicionarGrupo(GrupoDTO grupoDTO) throws ParseException {
-        if(grupoDTO.getNome().isEmpty() || grupoDTO.getLocalizacao().isEmpty() || grupoDTO.getnTocadores() < 0 || 
-                grupoDTO.getnAcompanhantes() < 0 || !isValidContacto(grupoDTO.getContacto())){
+    public Grupo adicionarGrupo(String nome, String localizacao, String distrito, String concelho, int nTocadores, int nAcompanhantes, String contacto, String email, String hora)  {
+        if(nome.isEmpty() || localizacao.isEmpty() || nTocadores < 0 || nAcompanhantes < 0 || !isValidContacto(contacto) || !isValidEmail(email)){
             return null;
         }
-        
-        Grupo grupo;
-        Data data;
-        if(grupos.isEmpty()){
-            data = new Data(GESTAO_EVENTO.getEvento().getStringToDate());
-            System.out.println("vazio");
-        }else{
+
+        Calendar data = GestaoEvento.getINSTACIA().getEvento().getData();
+
+        if (hora != null){
+            String[] splited = hora.split(":");
+            data.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splited[0]));
+            data.set(Calendar.MINUTE, Integer.parseInt(splited[1]));
+        } else {
             data = getUltimaDataDisponivel();
-            data.adicionarMinutos(Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo()));
         }
         
-        if(existeNomeGrupo(grupoDTO.getNome())){
+        if(existeNomeGrupo(nome)){
             return null; 
         }
 
-        grupo = new Grupo(grupoDTO.getNome(), grupoDTO.getLocalizacao(), grupoDTO.getDistrito(), 
-                    grupoDTO.getConcelho().equals(constantes.Constantes.SELECIONE_UM_CONCELHO) ? null : grupoDTO.getConcelho(),
-                    grupoDTO.getEmail(), grupoDTO.getContacto(), grupoDTO.getnTocadores(), grupoDTO.getnAcompanhantes(), 
-                    data);
+        Grupo grupo = new Grupo(nome, localizacao, distrito, concelho.equals(constantes.Constantes.SELECIONE_UM_CONCELHO) ? null : concelho,
+            email, contacto, nTocadores, nAcompanhantes, (Calendar) data.clone(), false);
+
         grupos.add(grupo);
-        addGrupoNaoEspecial();
-        
-        
+
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("ADICIONAR GRUPO " + grupo.getNome());
+
         exportarGrupos();
-        
-        checkAdicionarEspecial();
-        return grupoToDTO(grupo);
+
+        checkAdicionarLinhaBranca();
+
+        return grupo;
     }
     
-    public Data getUltimaDataDisponivel(){
+    public Calendar getUltimaDataDisponivel(){
         ArrayList<Grupo> grupos = getGrupos();
-        if(grupos.size() <= 1){
-            return new Data(grupos.get(0).getHoraPrevista().dataToString());
+
+        int minutosGrupo = GESTAO_EVENTO.getEvento().getMinutosGrupo();
+
+        Calendar dataEvento = (Calendar) GESTAO_EVENTO.getEvento().getData().clone();
+
+        if(grupos.size() == 0){
+            return dataEvento;
         }
-        for(int i = 0; i < grupos.size()-1; i++){
-            if(grupos.get(i).getHoraPrevista().getMinutosEntreDatas(grupos.get(i+1).getHoraPrevista()) > 
-                    Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo())){
-                return new Data(grupos.get(i).getHoraPrevista().dataToString());
+
+        Calendar current;
+        Calendar data = Calendar.getInstance();
+
+        if(grupos.size() == 1){
+            current = (Calendar) grupos.get(0).getDataHoraPrevista().clone();
+
+            data.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH), current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE));
+            data.add(Calendar.MINUTE, minutosGrupo);
+
+            Calendar clone = (Calendar) data.clone();
+            long diferenca = Duration.between(dataEvento.toInstant(), clone.toInstant()).toMinutes();
+
+            return diferenca > minutosGrupo ? dataEvento : clone;
+        }
+
+
+        for(int i = 0; i < grupos.size() - 1; i++){
+            long diferenca = Duration.between(grupos.get(i).getDataHoraPrevista().toInstant(), grupos.get(i + 1).getDataHoraPrevista().toInstant()).toMinutes();
+
+            if(diferenca > minutosGrupo){
+                current = (Calendar) grupos.get(i).getDataHoraPrevista().clone();
+
+                data.set(current.get(Calendar.YEAR), current.get(Calendar.MONTH), current.get(Calendar.DAY_OF_MONTH), current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE) );
+                data.add(Calendar.MINUTE, minutosGrupo);
+
+                return (Calendar) data.clone();
             }
         }
-        return new Data(grupos.get(grupos.size()-1).getHoraPrevista().dataToString());
+
+        Calendar ultimoGrupo = (Calendar) grupos.get(grupos.size() - 1).getDataHoraPrevista().clone();
+        data.set(ultimoGrupo.get(Calendar.YEAR), ultimoGrupo.get(Calendar.MONTH), ultimoGrupo.get(Calendar.DAY_OF_MONTH), ultimoGrupo.get(Calendar.HOUR_OF_DAY), ultimoGrupo.get(Calendar.MINUTE) );
+        data.add(Calendar.MINUTE, minutosGrupo);
+
+        return (Calendar) data.clone();
     }
     
-    private void checkAdicionarEspecial(){
-        if((getQtdGrupos() % constantes.Constantes.NUMERO_GRUPO_PARA_INSERIR_ESPECIAL) == 0){
-            Data data = new Data(getUltimoGrupo().getHoraPrevista().dataToString());
-            data.adicionarMinutos(Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo()));
-            adicionarGrupoEspecial("", data);
+    private void checkAdicionarLinhaBranca(){
+        int quantideGrupos = getQtdGrupos();
+
+        if((quantideGrupos % constantes.Constantes.NUMERO_GRUPO_PARA_INSERIR_ESPECIAL) != 0) return;
+
+        Calendar data = (Calendar) getUltimaDataDisponivel().clone();
+        adicionarLinhaBranca("", (Calendar) data.clone());
+    }
+    
+    public Grupo editarGrupo(String nome, String localizacao, String distrito, String concelho, int nTocadores, int nAcompanhantes, String contacto, String email, String hora) {
+        Grupo nextGrupo = getGrupoByNome(nome);
+
+        if (nextGrupo == null ) return null;
+
+        if(localizacao.isEmpty() || nTocadores < 0 || nAcompanhantes < 0 || !isValidContacto(contacto) || !isValidEmail(email)){
+            return null;
         }
-    }
-    
-    public GrupoDTO editarGrupo(GrupoDTO grupoDTO) {
-        Grupo grupo = getGrupoByPosicao(grupoDTO.getPosicao());
+
+        nextGrupo.setNome(nome);
+        nextGrupo.setLocalizacao(localizacao);
+        nextGrupo.setnTocadores(nTocadores);
+        nextGrupo.setnAcompanhantes(nAcompanhantes);
+        nextGrupo.setConcelho(concelho.equals(constantes.Constantes.SELECIONE_UM_CONCELHO) ? null : concelho);
+        nextGrupo.setDistrito(distrito);
+        nextGrupo.setContacto(contacto);
+        nextGrupo.setEmail(email);
+
+        Calendar data = nextGrupo.getDataHoraPrevista();
+        String[] splited = hora.split(":");
+        data.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splited[0]));
+        data.set(Calendar.MINUTE, Integer.parseInt(splited[1]));
+
+        nextGrupo.setHoraPrevista(data);
         
-        grupo.setNome(grupoDTO.getNome());
-        grupo.setLocalizacao(grupoDTO.getLocalizacao());
-        grupo.setnTocadoresIncricao(grupoDTO.getnTocadores());
-        grupo.setnAcompanhantesInscricao(grupoDTO.getnAcompanhantes());
-        grupo.setConcelho(grupoDTO.getConcelho().equals(constantes.Constantes.SELECIONE_UM_CONCELHO) ? null : grupoDTO.getConcelho());
-        grupo.setDistrito(grupoDTO.getDistrito());
-        grupo.setContacto(grupoDTO.getContacto());
-        grupo.setEmail(grupoDTO.getEmail());
-        grupo.setTocar(grupoDTO.isTocar());
-        grupo.setEspecial(grupoDTO.isEspecial());
-        grupo.setHoraPrevista(grupoDTO.getStringToDate());
-        
-        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("EDITAR GRUPO " + grupo.getNome());
+        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("EDITAR GRUPO " + nextGrupo.getNome());
         exportarGrupos();
         
-        return grupoToDTO(grupo);
+        return nextGrupo;
     }
     
     public void removerGrupo(int index) {
         Grupo grupo = getGrupo(index);
-        if(grupo.isEspecial()){
-            removeGrupoEspecial();
-        }else{
-            removeGrupoNaoEspecial();
-        }
         String nome = grupo.getNome();
         
         getGrupos().remove(index);
         
-        for(int i=index;i<getQtdGrupos();i++){
-            getGrupo(i).getHoraPrevista().retirarMinutos(
-                    Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo()));
+        for(int i = index; i < getQtdGrupos(); i++){
+            getGrupo(i).getDataHoraPrevista().add( Calendar.MINUTE, -GESTAO_EVENTO.getEvento().getMinutosGrupo());
         }
                 
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("REMOVER GRUPO " + nome);
@@ -150,9 +172,12 @@ public class GestaoGrupo {
     }
     
     public boolean isValidEmail(String email) {
+        if (email == null || email.length() == 0) return true;
+
         String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
         java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
         java.util.regex.Matcher m = p.matcher(email);
+
         return m.matches();
     }
     
@@ -160,13 +185,9 @@ public class GestaoGrupo {
         return contacto.matches("[0-9]+") && contacto.length() == 9;
     }
     
-    private ArrayList<Grupo> getGrupos() {
-        grupos.sort((o1, o2) -> o1.getHoraPrevista().getData().compareTo(o2.getHoraPrevista().getData()));
+    public ArrayList<Grupo> getGrupos() {
+        grupos.sort(Comparator.comparing(Grupo::getDataHoraPrevista));
         return grupos;
-    }
-    
-    public ArrayList<GrupoDTO> getGruposDTOs() {
-        return (gruposToDTOs(getGrupos()));
     }
     
     public ArrayList<Grupo> getGruposNaoAtuaram() {
@@ -179,31 +200,15 @@ public class GestaoGrupo {
         return gruposNaoAturam;
     }
     
-    public ArrayList<GrupoDTO> getGruposDTOsNaoAtuaram() {
-        return (gruposToDTOs(getGruposNaoAtuaram()));
+    public ArrayList<Grupo> getGruposDTOsNaoAtuaram() {
+        return getGruposNaoAtuaram();
     }
     
     public Grupo getUltimoGrupo() {
         return getGrupos().get(grupos.size() - 1);
     }
-    
-    public Grupo getPenultimoGrupo() {
-        if(grupos.size() >= 2){
-            return getGrupos().get(grupos.size() - 2);
-        }
-        return getGrupos().get(grupos.size() - 1);
-    }
-    
-    public Grupo getUltimoGrupoNaoEspecial(){
-        for(int i = getQtdGrupos() - 1; i >= 0; i--){
-            if(!grupos.get(i).isEspecial()){
-                return getGrupo(i);
-            }
-        }
-        return null;
-    }
-    
-    public Grupo getGrupoByName(String nomeGrupo){
+
+    public Grupo getGrupoByNome(String nomeGrupo){
         for (Grupo grupo : grupos) {
             if(grupo.getNome().equals(nomeGrupo))
                 return grupo;
@@ -212,15 +217,15 @@ public class GestaoGrupo {
     }
     
     public Grupo getGrupoByHoraPrevista(String horaPrevista){
-        for (Grupo grupo : grupos) {
-            if(grupo.getHoraPrevista().getMinutosEntreDatas(horaPrevista) == 0)
+        /* for (Grupo grupo : grupos) {
+            if(grupo.getDataHoraPrevista().getMinutosEntreDatas(horaPrevista) == 0)
                 return grupo;
         }
         return null;
-    }
-    
-    public GrupoDTO getGrupoDTOByName(String nomeGrupo){
-        return grupoToDTO(getGrupoByName(nomeGrupo));
+
+         */
+
+        return null;
     }
     
     public Grupo getGrupoByPosicao(int posicao){
@@ -244,44 +249,10 @@ public class GestaoGrupo {
         return grupos.size();
     }
     
-    public int getQtdGruposNaoEspecial(){
-        return gruposNaoEspecial;
-    }
-    
-    public int getQtdGruposEspecial(){
-        return gruposEspecial;
-    }
-    
-    public void addGrupoNaoEspecial(){
-        gruposNaoEspecial++;
-    }
-    
-    public void addGrupoEspecial(){
-        gruposEspecial++;
-    }
-    
-    public void removeGrupoNaoEspecial(){
-        gruposNaoEspecial--;
-    }
-    
-    public void removeGrupoEspecial(){
-        gruposEspecial--;
-    }
-    
     public int getQtdTocadores(){
         int qtd = 0;
         for (Grupo grupo : grupos) {
-            qtd += grupo.getnTocadoresIncricao();
-        }
-        return qtd;
-    }
-    
-    public int getQtdTocadoresReal(){
-        int qtd = 0;
-        for (Grupo grupo : grupos) {
-            if(grupo.isTocar()){
-                qtd += grupo.getnTocadoresReal();
-            }
+            qtd += grupo.getnTocadores();
         }
         return qtd;
     }
@@ -289,29 +260,13 @@ public class GestaoGrupo {
     public int getQtdAcompanhantes(){
         int qtd = 0;
         for (Grupo grupo : grupos) {
-            qtd += grupo.getnAcompanhantesInscricao();
+            qtd += grupo.getnAcompanhantes();
         }
         return qtd;
     }
-
-    public void trocarGrupos(GrupoDTO grupoDTOOrigem, GrupoDTO grupoDTODestino){        
-        //int posAux = grupoDTOOrigem.getPosicao();
-        
-        Grupo gOrigem = getGrupoByPosicao(grupoDTOOrigem.getPosicao());
-        Grupo gDestino = getGrupoByPosicao(grupoDTODestino.getPosicao());
-
-        //gOrigem.setPosicao(grupoDTODestino.getPosicao());
-        gOrigem.setHoraPrevista(grupoDTODestino.getStringToDate());
-        
-        //gDestino.setPosicao(posAux);
-        gDestino.setHoraPrevista(grupoDTOOrigem.getStringToDate());
-        
-        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("TROCAR GRUPOS");
-        exportarGrupos();
-    }
     
     public void alterarHoraPrevista(String dataInicial, boolean acerto){
-        int minAcrescentar = 0;
+        /* int minAcrescentar = 0;
         for(Grupo g : getGrupos()){
             if((acerto && !g.isTocar()) || !acerto){
                 Data data = new Data(dataInicial);
@@ -321,38 +276,17 @@ public class GestaoGrupo {
             }
         }
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("TROCAR HORA PREVISTA DO GRUPO");
-    }
-    
-    public GrupoDTO grupoToDTO(Grupo grupo){
-        return new GrupoDTO(grupo.getPosicao() , grupo.getNome(), grupo.getLocalizacao(), 
-                grupo.getDistrito() == null ? "" : grupo.getDistrito(), 
-                grupo.getConcelho() == null ? "" : grupo.getConcelho(),
-                grupo.getEmail(), grupo.getContacto(), 
-                grupo.getnTocadoresIncricao(), grupo.getnAcompanhantesInscricao(), 
-                grupo.getHoraPrevista().dataToString(), grupo.isEspecial(), grupo.isTocar());
-    }
-    
-    public ArrayList<GrupoDTO> gruposToDTOs(ArrayList<Grupo> grupos){
-        ArrayList<GrupoDTO> grupoDTOs = new ArrayList<>();
-        for(Grupo g :grupos){
-            grupoDTOs.add(grupoToDTO(g));
-        }
-        return grupoDTOs;
+        */
     }
 
-    public void setEstadoAtucao(String data) {
-        Grupo grupo = getGrupoByHoraPrevista(data);
+    public void setEstadoAtucao(String nome) {
+        Grupo grupo = getGrupoByNome(nome);
+
         if(grupo == null){
             return;
         }
-        
-        if(!grupo.isTocar()){
-            grupo.setTocar(true);
-            grupo.setnTocadoresReal(grupo.getnTocadoresIncricao());
-        }else{
-            grupo.setTocar(false);
-            grupo.setnTocadoresReal(0);
-        }
+
+        grupo.setTocar(!grupo.isTocar());
         
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("CONFIRMACAO DA ATUACAO " + grupo.getNome());
         exportarGrupos();
@@ -360,106 +294,35 @@ public class GestaoGrupo {
     
     public boolean exportarGrupos(){
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("EXPORTAR GRUPOS");
-        return FICHEIRO_INS.exportarGrupoDTOFicheiroTXT(getGruposDTOs());
+
+        return FICHEIRO_INS.exportarGrupoFicheiroTXT(getGrupos());
     }
     
     public boolean importarGrupos(){
-        ArrayList<GrupoDTO> grupos;
-        if((grupos = FICHEIRO_INS.importarGrupoDTOFicheiroTXT()) == null){
-            return false;
+        ArrayList<Grupo> grupos;
+
+        if((grupos = FICHEIRO_INS.importarGruposFicheiroTXT()) == null) return false;
+
+        for(Grupo g : grupos){
+             adicionarGrupo(g.getNome(), g.getLocalizacao(), g.getDistrito(), g.getConcelho(), g.getnTocadores(), g.getnAcompanhantes(),
+                    g.getContacto(), g.getEmail(), g.getHoraPrevista());
         }
-        for(GrupoDTO g : grupos){
-            try {
-                adicionarGrupo(g);
-            } catch (ParseException ex) {
-                
-            }
-        }
+
         FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("IMPORTAR GRUPOS");
+
         return true;
     }
 
-    public boolean avancarGrupo(int index) {   
-        int iteracoes = index + constantes.Constantes.NUMERO_GRUPO_PARA_AVANCAR;
-        if(iteracoes > (getQtdGrupos() - 1)){
-            iteracoes = getQtdGrupos() - 1;
-        }
-        
-        ArrayList<Grupo> array = new ArrayList<>();
-        
-        Grupo grupoInicial = getGrupo(index);
-        Grupo grupo;
-        for(int i = index+1; i <= iteracoes; i++){
-            grupo = getGrupo(i);
-            array.add(grupo);
-        }
-        
-        int minutos = Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo());
-        for(Grupo g : array){
-            grupos.remove(g);
-            g.getHoraPrevista().retirarMinutos(minutos);
-            grupos.add(g);
-        }
-        
-        grupos.remove(grupoInicial);
-        grupoInicial.getHoraPrevista().adicionarMinutos(minutos * (iteracoes-index));
-        grupos.add(grupoInicial);
-        
-        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("AVANCAR GRUPO " + getGrupo(index).getNome());
-        
-        return true;
-    }
-    
-    public boolean recuarGrupo(int index) {   
-        int iteracoes = index - constantes.Constantes.NUMERO_GRUPO_PARA_AVANCAR;
-        int aux = 0;
-        if(iteracoes < 0){
-            iteracoes = 0;
-        }
-        
-        ArrayList<Grupo> array = new ArrayList<>();
-        
-        Grupo grupoInicial = getGrupo(index);
-        Grupo grupo;
-        System.out.println(index-1 + ""+iteracoes);
-        for(int i = (index-1); i >= iteracoes; i--){
-            grupo = getGrupos().get(i);
-            array.add(grupo);
-            aux++;
-        }
-        
-        int minutos = Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo());
-        for(Grupo g : array){
-            grupos.remove(g);
-            g.getHoraPrevista().adicionarMinutos(minutos);
-            grupos.add(g);
-        }
-        
-        grupos.remove(grupoInicial);
-        grupoInicial.getHoraPrevista().retirarMinutos(minutos * aux);
-        grupos.add(grupoInicial);
-        
-        FICHEIRO_INS.escreverRegistoAcoesFicheiroTXT("RECUAR GRUPO " + getGrupo(index).getNome());
-        
-        return true;
-    }
-    
-    public Data getUltimaHora(){
-        if(getPenultimoGrupo().getHoraPrevista().getMinutosEntreDatas(getUltimoGrupo().getHoraPrevista()) > 
-                Integer.parseInt(GESTAO_EVENTO.getEvento().getMinutosGrupo())){
-            return getPenultimoGrupo().getHoraPrevista();
-        }
-        return getUltimoGrupo().getHoraPrevista();
-    }
 
     public ListModel<String> getListaGruposDistrito() {
         hashMap = new HashMap<>();
         for(Grupo g : grupos){
             String distrito = g.getDistrito();
-            //System.out.println(distrito);
+
             if(distrito == null || distrito.equals("")){
                 continue;
             }
+
             if (!hashMap.containsKey(distrito)) {
                 hashMap.put(distrito, 1);
             } else {
@@ -497,7 +360,6 @@ public class GestaoGrupo {
         
         return listagem;
     }
-    
     
 }
 

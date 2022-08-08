@@ -1,13 +1,14 @@
 package vistas;
 
-import dtos.GrupoDTO;
 import dialogos.DialogoGrupo;
 import dialogos.DialogoParse;
 import gestores.GestaoGrupo;
 import gestores.GestaoLocal;
-import java.text.ParseException;
-import javax.swing.DefaultComboBoxModel;
-import util.Data;
+import modelos.Grupo;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Calendar;
 
 public class ConfigurarGrupo extends javax.swing.JDialog {
     
@@ -15,74 +16,57 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
     private final DialogoParse DIALOGO_PARSE = DialogoParse.getINSTACIA();
     private final GestaoGrupo GESTAO_GRUPO = GestaoGrupo.getINSTACIA();
     private final GestaoLocal GESTAO_LOCAL = GestaoLocal.getINSTACIA();
-    
-    private GrupoDTO grupoDTO;
+
+    private Grupo grupo;
 
     public ConfigurarGrupo(java.awt.Frame parent) {
         super(parent, true);
-        this.grupoDTO = null;
+        this.grupo = null;
         initComponents();
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(btnAceitar);
         setTitle("Criar Grupo");
-        
-        DefaultComboBoxModel modelo =  new DefaultComboBoxModel(GESTAO_LOCAL.getDistritos().toArray());
+
+        DefaultComboBoxModel modelo = new DefaultComboBoxModel(GESTAO_LOCAL.getDistritos().toArray());
         jComboBoxDistritos.setModel(modelo);
-        
-        jTextFieldHora.setEnabled(false);
-        jTextFieldDia.setEnabled(false);
-        jLabelDia.setEnabled(false);
-        jLabelHora.setEnabled(false);
-        
         jComboBoxConcelhos.setEnabled(false);
-    }     
-    
+
+        Calendar ultimaDataDisponivel = GESTAO_GRUPO.getUltimaDataDisponivel();
+
+        jTextFieldHora.setText(ultimaDataDisponivel.get(Calendar.HOUR_OF_DAY) + ":" + ultimaDataDisponivel.get(Calendar.MINUTE));
+    }
+
     public ConfigurarGrupo(java.awt.Frame parent, String nome) {
         super(parent, true);
-        this.grupoDTO = GESTAO_GRUPO.getGrupoDTOByName(nome);
+        this.grupo = GESTAO_GRUPO.getGrupoByNome(nome);
         initComponents();
         setLocationRelativeTo(null);
         getRootPane().setDefaultButton(btnAceitar);
         setTitle("Editar Grupo");
-        atualizarVista();
+
+        jTextFieldNome.setText(grupo.getNome());
+        jTextFieldLocalizacao.setText(grupo.getLocalizacao());
+
+        DefaultComboBoxModel modelo = new DefaultComboBoxModel(GESTAO_LOCAL.getDistritos().toArray());
+        jComboBoxDistritos.setModel(modelo);
+        jComboBoxDistritos.setSelectedItem(grupo.getDistrito());
+
+        modelo = new DefaultComboBoxModel(GESTAO_LOCAL.getConcelhos(grupo.getDistrito()).toArray());
+        jComboBoxConcelhos.setModel(modelo);
+
+        String concelho = grupo.getConcelho();
+
+        if(concelho != null) jComboBoxConcelhos.setSelectedItem(concelho);
+        else jComboBoxConcelhos.setSelectedIndex(0);
+
+        jTextFieldEmail.setText(grupo.getEmail());
+        jTextFieldContacto.setText(grupo.getContacto());
+        jFormattedTextFieldNTocadores.setText(String.valueOf(grupo.getnTocadores()));
+        jFormattedTextFieldNAcompanhantes.setText(String.valueOf(grupo.getnAcompanhantes()));
+
+        jTextFieldHora.setText(grupo.getDataHoraPrevista().get(Calendar.HOUR_OF_DAY) + ":" + grupo.getDataHoraPrevista().get(Calendar.MINUTE));
     }
     
-    public void atualizarVista(){
-        jTextFieldNome.setText(grupoDTO.getNome());
-        jTextFieldLocalizacao.setText(grupoDTO.getLocalizacao());
-        jFormattedTextFieldNTocadores.setText(String.valueOf(grupoDTO.getnTocadores()));
-        jFormattedTextFieldNAcompanhantes.setText(String.valueOf(grupoDTO.getnAcompanhantes()));
-        jTextFieldEmail.setText(grupoDTO.getEmail());
-        jTextFieldContacto.setText(grupoDTO.getContacto());
-        
-        if(grupoDTO.isEspecial()){
-            jCheckBoxEspecial.setSelected(true);
-            jLabelDia.setEnabled(true);
-            jLabelHora.setEnabled(true);
-            jTextFieldHora.setEnabled(true);
-            jTextFieldHora.setText(grupoDTO.getHoraPrevista()); 
-            jTextFieldDia.setEnabled(true);
-            jTextFieldDia.setText(grupoDTO.getDataPrevista());
-        }else{
-            jComboBoxDistritos.setSelectedItem(grupoDTO.getDistrito());
-            jComboBoxConcelhos.setSelectedItem(grupoDTO.getConcelho());
-            jCheckBoxEspecial.setSelected(false);
-            jLabelDia.setEnabled(false);
-            jLabelHora.setEnabled(false);
-            jTextFieldHora.setText(""); 
-            jTextFieldHora.setEnabled(false);
-            jTextFieldDia.setText(""); 
-            jTextFieldDia.setEnabled(false);
-            DefaultComboBoxModel modelo =  new DefaultComboBoxModel(GESTAO_LOCAL.getDistritos().toArray());
-            jComboBoxDistritos.setModel(modelo);
-            jComboBoxDistritos.setSelectedItem(grupoDTO.getDistrito());
-            modelo =  new DefaultComboBoxModel(GESTAO_LOCAL.getConcelhos(grupoDTO.getDistrito()).toArray());
-            jComboBoxConcelhos.setModel(modelo);
-            jComboBoxConcelhos.setSelectedItem(grupoDTO.getConcelho());
-        }
-    }
-    
-    @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
@@ -102,97 +86,70 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
         jLabelContacto = new javax.swing.JLabel();
         jTextFieldEmail = new javax.swing.JTextField();
         jTextFieldContacto = new javax.swing.JTextField();
-        jCheckBoxEspecial = new javax.swing.JCheckBox();
         jTextFieldHora = new javax.swing.JTextField();
         jLabelNTocadores2 = new javax.swing.JLabel();
         jComboBoxConcelhos = new javax.swing.JComboBox<String>();
         jLabelHora = new javax.swing.JLabel();
-        jLabelDia = new javax.swing.JLabel();
-        jTextFieldDia = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        jLabelNomeGrupo.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelNomeGrupo.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelNomeGrupo.setText("Nome do Grupo *");
 
-        jLabelNTocadores.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabelNTocadores.setText("Numero de Tocadores *");
+        jLabelNTocadores.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
+        jLabelNTocadores.setText("N Tocadores *");
 
-        jTextFieldNome.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jTextFieldNome.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        btnAceitar.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnAceitar.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnAceitar.setText("Aceitar");
-        btnAceitar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnAceitarActionPerformed(evt);
-            }
-        });
+        btnAceitar.addActionListener(this::btnAceitarActionPerformed);
 
-        btnCancelar.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        btnCancelar.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         btnCancelar.setText("Cancelar");
-        btnCancelar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnCancelarActionPerformed(evt);
-            }
-        });
+        btnCancelar.addActionListener(this::btnCancelarActionPerformed);
 
         jFormattedTextFieldNTocadores.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
-        jFormattedTextFieldNTocadores.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jFormattedTextFieldNTocadores.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jLabelNAcompanhantes.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabelNAcompanhantes.setText("Numero de Acompanhantes");
+        jLabelNAcompanhantes.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
+        jLabelNAcompanhantes.setText("N Acompanhantes");
 
         jFormattedTextFieldNAcompanhantes.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(new javax.swing.text.NumberFormatter()));
-        jFormattedTextFieldNAcompanhantes.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jFormattedTextFieldNAcompanhantes.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jLabelLocalizacao.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelLocalizacao.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelLocalizacao.setText("Localizacao *");
 
-        jTextFieldLocalizacao.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jTextFieldLocalizacao.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jLabelNTocadores1.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelNTocadores1.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelNTocadores1.setText("Distrito *");
 
-        jComboBoxDistritos.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jComboBoxDistritos.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBoxDistritosItemStateChanged(evt);
-            }
-        });
+        jComboBoxDistritos.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
+        jComboBoxDistritos.addItemListener(this::jComboBoxDistritosItemStateChanged);
 
-        jLabelEmail.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelEmail.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelEmail.setText("Email");
 
-        jLabelContacto.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelContacto.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelContacto.setText("Contacto * ");
 
-        jTextFieldEmail.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jTextFieldEmail.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jTextFieldContacto.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jTextFieldContacto.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jCheckBoxEspecial.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jCheckBoxEspecial.setText("Grupo Especial");
-        jCheckBoxEspecial.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jCheckBoxEspecialItemStateChanged(evt);
-            }
-        });
+        jTextFieldHora.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jTextFieldHora.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-
-        jLabelNTocadores2.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelNTocadores2.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelNTocadores2.setText("Concelho");
 
-        jComboBoxConcelhos.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jComboBoxConcelhos.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
 
-        jLabelHora.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        jLabelHora.setFont(new java.awt.Font("Tahoma", Font.PLAIN, 14)); // NOI18N
         jLabelHora.setText("Hora");
 
-        jLabelDia.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
-        jLabelDia.setText("Dia");
-
-        jTextFieldDia.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -234,16 +191,12 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
                                             .addComponent(jFormattedTextFieldNTocadores)
                                             .addComponent(jFormattedTextFieldNAcompanhantes)
                                             .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLabelDia, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addGap(10, 10, 10)
-                                                .addComponent(jTextFieldDia, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                                 .addComponent(jLabelHora, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addGap(129, 129, 129)))
                                         .addGap(0, 0, Short.MAX_VALUE)))))
                         .addGap(10, 10, 10))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jCheckBoxEspecial, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(305, 305, 305)
                         .addComponent(jTextFieldHora, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
@@ -285,10 +238,7 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
                     .addComponent(jFormattedTextFieldNAcompanhantes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jCheckBoxEspecial)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jTextFieldDia, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabelDia))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jTextFieldHora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabelHora)))
@@ -303,7 +253,6 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAceitarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAceitarActionPerformed
-        boolean especial = jCheckBoxEspecial.isSelected();
         String nome = jTextFieldNome.getText().trim();
         String localizacao = jTextFieldLocalizacao.getText().trim();
         String email = jTextFieldEmail.getText().trim();
@@ -312,27 +261,15 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
         String nAcompanhantes = jFormattedTextFieldNAcompanhantes.getText().trim();
         String distrito = (String) jComboBoxDistritos.getSelectedItem();
         String concelho = (String) jComboBoxConcelhos.getSelectedItem();
-        
-        if(especial && grupoDTO == null){
-            Data data = new Data(jTextFieldDia.getText().concat(" ").concat(jTextFieldHora.getText()));
-            GESTAO_GRUPO.adicionarGrupoEspecial(nome, data);
-            setVisible(false);
-            return;
-        }else if(especial && grupoDTO != null){
-            grupoDTO = new GrupoDTO(grupoDTO.getPosicao(), nome, localizacao, distrito, concelho, email, contacto, 
-                    Integer.parseInt(nTocadores), Integer.parseInt(nAcompanhantes), jTextFieldHora.getText(), true, 
-                    grupoDTO.isTocar());
-            GESTAO_GRUPO.editarGrupo(grupoDTO);
-            setVisible(false);
-            return;
-        }
 
         if(nome.isEmpty() || localizacao.isEmpty() || nTocadores.isEmpty()){
             DIALOGO_GRUPO.faltamParametros();
+
             return;
         }
-        
+
         int nToc = 0, nAcom = 0;
+
         try{
             nToc = Integer.parseInt(nTocadores);
             nAcom = nAcompanhantes.isEmpty() ? 0 : Integer.parseInt(nAcompanhantes);
@@ -341,24 +278,17 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
             return;
         }
 
-        try{
-            if(grupoDTO == null){
-                grupoDTO = GESTAO_GRUPO.adicionarGrupo(new GrupoDTO(0, nome, localizacao, distrito, concelho, email, 
-                        contacto, nToc, nAcom, "", false, false));
-            }else{
-                grupoDTO = GESTAO_GRUPO.editarGrupo(new GrupoDTO(grupoDTO.getPosicao(), nome, localizacao, distrito,
-                        concelho, email, contacto, nToc, nAcom, grupoDTO.getFullDataPrevista(), especial, 
-                        grupoDTO.isTocar()));
-            }
+        if(grupo == null){
+            grupo = GESTAO_GRUPO.adicionarGrupo(nome, localizacao, distrito, concelho, nToc, nAcom, contacto, email, jTextFieldHora.getText());
+        }else{
+            grupo = GESTAO_GRUPO.editarGrupo(nome, localizacao, distrito, concelho,  nToc, nAcom, contacto, email, jTextFieldHora.getText());
+        }
 
-            if(grupoDTO == null){
-                DIALOGO_GRUPO.erroConfiguracaoGrupo();
-            }else{
-                //dialogoGrupo.sucessoConfiguracaoGrupo();
-                setVisible(false);
-            }
-        }catch (ParseException ex) {
-            DIALOGO_PARSE.erroParseGrupoDTO();
+        if(grupo == null){
+            DIALOGO_GRUPO.erroConfiguracaoGrupo();
+        }else{
+            //dialogoGrupo.sucessoConfiguracaoGrupo();
+            setVisible(false);
         }
     }//GEN-LAST:event_btnAceitarActionPerformed
 
@@ -368,39 +298,19 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
 
     private void jComboBoxDistritosItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jComboBoxDistritosItemStateChanged
         jComboBoxConcelhos.setEnabled(true);
-        DefaultComboBoxModel modelo =  new DefaultComboBoxModel(
-                GESTAO_LOCAL.getConcelhos((String) jComboBoxDistritos.getSelectedItem()).toArray());
+        DefaultComboBoxModel modelo = new DefaultComboBoxModel(GESTAO_LOCAL.getConcelhos((String) jComboBoxDistritos.getSelectedItem()).toArray());
         jComboBoxConcelhos.setModel(modelo);
     }//GEN-LAST:event_jComboBoxDistritosItemStateChanged
-
-    private void jCheckBoxEspecialItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_jCheckBoxEspecialItemStateChanged
-        if(jCheckBoxEspecial.isSelected()){
-            jLabelDia.setEnabled(true);
-            jLabelHora.setEnabled(true);
-            jTextFieldHora.setEnabled(true);
-            jTextFieldDia.setEnabled(true);
-            jTextFieldDia.setText(GESTAO_GRUPO.getUltimoGrupoNaoEspecial().getHoraPrevista().dataToString().split(" ")[0]);
-            return;
-        }
-        jLabelDia.setEnabled(false);
-        jLabelHora.setEnabled(false);
-        jTextFieldHora.setEnabled(false);
-        jTextFieldDia.setEnabled(false);
-    }//GEN-LAST:event_jCheckBoxEspecialItemStateChanged
-
-
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnAceitar;
     private javax.swing.JButton btnCancelar;
-    private javax.swing.JCheckBox jCheckBoxEspecial;
     private javax.swing.JComboBox<String> jComboBoxConcelhos;
     private javax.swing.JComboBox<String> jComboBoxDistritos;
     private javax.swing.JFormattedTextField jFormattedTextFieldNAcompanhantes;
     private javax.swing.JFormattedTextField jFormattedTextFieldNTocadores;
     private javax.swing.JLabel jLabelContacto;
-    private javax.swing.JLabel jLabelDia;
     private javax.swing.JLabel jLabelEmail;
     private javax.swing.JLabel jLabelHora;
     private javax.swing.JLabel jLabelLocalizacao;
@@ -410,7 +320,6 @@ public class ConfigurarGrupo extends javax.swing.JDialog {
     private javax.swing.JLabel jLabelNTocadores2;
     private javax.swing.JLabel jLabelNomeGrupo;
     private javax.swing.JTextField jTextFieldContacto;
-    private javax.swing.JTextField jTextFieldDia;
     private javax.swing.JTextField jTextFieldEmail;
     private javax.swing.JTextField jTextFieldHora;
     private javax.swing.JTextField jTextFieldLocalizacao;

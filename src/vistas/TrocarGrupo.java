@@ -1,8 +1,8 @@
 package vistas;
 
-import dtos.GrupoDTO;
 import javax.swing.DefaultComboBoxModel;
 import gestores.GestaoGrupo;
+import modelos.Grupo;
 
 public class TrocarGrupo extends javax.swing.JDialog {
 
@@ -107,10 +107,10 @@ public class TrocarGrupo extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonAceitarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAceitarActionPerformed
-        GrupoDTO grupoDTOOrigem = (GrupoDTO) jComboBoxOrigem.getSelectedItem();
-        GrupoDTO grupoDTODestino = (GrupoDTO) jComboBoxDestino.getSelectedItem();
+        Grupo grupoOrigem = (Grupo) jComboBoxOrigem.getSelectedItem();
+        Grupo grupoDestino = (Grupo) jComboBoxDestino.getSelectedItem();
 
-        GESTAO_GRUPO.trocarGrupos(grupoDTOOrigem, grupoDTODestino);
+        // GESTAO_GRUPO.trocarGrupos(grupoOrigem, grupoDestino);
         //dialogoGrupo.sucessoTrocarGrupo();
         setVisible(false);
     }//GEN-LAST:event_jButtonAceitarActionPerformed
